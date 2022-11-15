@@ -4,14 +4,31 @@ say -v Moira "Welcome to the Nuovo MacOS Setup Script!"
 say -v Moira "Let's get started!"
 
 # ---------------------------------------------------------------------------------------------
+# Setting up arguments
+
+while getopts m: flag
+do
+    case "${flag}" in
+        m) macname=${OPTARG};;
+    esac
+done
+
+# ---------------------------------------------------------------------------------------------
 
 # Entering as Root
 printf "🔐 Enter root password...\n"
 sudo -v
 
+printf "⚙️ Enabling Root User"
+dsenableroot
+
 # Keep alive Root
 printf "⌚️ Keep Root Account Alive...\n"
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
+printf "Please input the desired Mac Computer Name"
+ 
+ read macname
 
 # ---------------------------------------------------------------------------------------------
 
@@ -62,16 +79,16 @@ defaults write com.apple.screencapture type -string "png"
 # ---------------------------------------------------------------------------------------------
 
 # Configure macOS Keyboard
-say -v Moira "Let's setup your Keyboard!"
-printf "⚙️ Configure Keyboard...\n"
+# say -v Moira "Let's setup your Keyboard!"
+# printf "⚙️ Configure Keyboard...\n"
 
-defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false
-defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
-defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
-defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
-defaults write NSGlobalDomain KeyRepeat -int 0
-defaults write NSGlobalDomain InitialKeyRepeat -int 10
-defaults write com.apple.messageshelper.MessageController SOInputLineSettings -dict-add "continuousSpellCheckingEnabled" -bool false
+# defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false
+# defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false
+# defaults write -g NSAutomaticDashSubstitutionEnabled -bool false
+# defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false
+# defaults write NSGlobalDomain KeyRepeat -int 0
+# defaults write NSGlobalDomain InitialKeyRepeat -int 10
+# defaults write com.apple.messageshelper.MessageController SOInputLineSettings -dict-add "continuousSpellCheckingEnabled" -bool false
 
 # ---------------------------------------------------------------------------------------------
 
@@ -177,22 +194,11 @@ sudo spctl --master-disable
 printf "⚙️ Enable Remote Apple Events"
 sudo systemsetup -setremoteappleevents on
 
-printf "⚙️ Enable Root User"
-dsenableroot
-
 printf "⚙️ Improving Animation Speed of the Save Dialog Prompt"
 defaults write NSGlobalDomain NSWindowResizeTime .001
 
 printf "⚙️ Disable Spotlight Indexing"
 mdutil -i off -d /
-
-
-# Change name if you do not own a MacBook
-# printf "⚙️ Configure computer name...\n"
-# sudo scutil --set ComputerName "MacBook"
-# sudo scutil --set HostName "MacBook"
-# sudo scutil --set LocalHostName "MacBook"
-# sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "MacBook"
 
 # ---------------------------------------------------------------------------------------------
 
@@ -312,18 +318,23 @@ say -v Moira "Installing HomeBrew Apps"
 printf "⚙️ Installing HomeBrew Apps"
 
 # Install more recent versions of some OS X tools.
-brew install vim --override-system-vi
 brew install homebrew/dupes/grep
 brew install homebrew/dupes/openssh
-brew install homebrew/dupes/screen
-brew install homebrew/php/php74 --with-gmp
 brew install wget
 brew install mas
-brew cask install --appdir="/Applications" adobe-creative-cloud
-brew cask install --appdir="/Applications" google-chrome
-brew cask install --appdir="/Applications" slack
-brew cask install --appdir="/Applications" zoom
-brew cask install --appdir="/Applications" rustdesk
+brew install --cask adobe-creative-cloud
+brew install --cask google-chrome
+brew install --cask slack
+brew install --cask zoom
+
+# ---------------------------------------------------------------------------------------------
+
+# Change name if you do not own a MacBook | Passed through CLI Arguments: ex: macos.sh -m "macname" or macos.sh --macname "macname"
+printf "⚙️ Configure computer name...\n"
+sudo scutil --set ComputerName $macname
+sudo scutil --set HostName $macname
+sudo scutil --set LocalHostName $macname
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string $macname
 
 # ---------------------------------------------------------------------------------------------
 
